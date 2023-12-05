@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+setenv.sh
+test.txt

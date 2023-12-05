@@ -1,0 +1,15 @@
+* Notes
+** Contentful
+*** Domain Model
+- organization :: An organization serves, first and foremost, as a way to group users. The organization also links these users to a billing entity, so subscriptions and invoices are always tied to the organization, not your user.
+  - user :: anyone with a Contentful account
+  - space :: acts as a container for your content and any settings related to that content
+    - environment :: entities within a space that allow you to create and maintain multiple versions of the space-specific data and configuration, and make changes to them in isolation
+*** Data Model
+- space :: allows you to group all the related resources for a project together
+  - content model :: represents the content types you create
+    - content type :: All content types have standard fields that contain basic information about the content type, its fields and metadata
+      - field :: Each content type consists of a set of up to 50 fields that you define
+*** Content Management API
+*** GraphQL API
+
