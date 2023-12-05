@@ -1,31 +1,23 @@
 # -*- mode: restclient; -*-
 
-:HOST = localhost
-:PORT = 5000
-
 #
-GET https://api.contentful.com/spaces/:SPACE/environments/:ENVIRONMENT/content_types
-Authorization: Bearer :API_KEY
-
-#
+# Response: HTTP/1.1 204 NO CONTENT
 GET http://:HOST::PORT/healthz
 
 #
+# Response: HTTP/1.1 200 OK
 GET http://:HOST::PORT/capabilities
 
 #
+# Response: HTTP/1.1 405 METHOD NOT ALLOWED
 GET http://:HOST::PORT/explain
 
 #
+# Response: HTTP/1.1 200 OK
 GET http://:HOST::PORT/schema
 
-#
-GET https://connector-46542294-5418-4c76-a24e-60703ab9bb31-hyc5v23h6a-ue.a.run.app/schema
-
-#
-GET https://connector-13491d7c-50b4-4be6-aa9d-827b88930f0a-hyc5v23h6a-ue.a.run.app/schema
-
 # 
+# Response: HTTP/1.1 200 OK
 POST http://:HOST::PORT/query
 Content-Type: application/json
 
@@ -45,3 +37,437 @@ Content-Type: application/json
     }
   }
 }
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 229
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 406
+
+{
+  "collection": "person",
+  "query": {
+    "fields": {
+      "age": {
+        "type": "column",
+        "column": "age"
+      },
+      "name": {
+        "type": "column",
+        "column": "name"
+      },
+      "nickname": {
+        "type": "column",
+        "column": "nickname"
+      }
+    },
+    "limit": 10,
+    "where": {
+      "type": "binary_comparison_operator",
+      "column": {
+        "type": "column",
+        "name": "name",
+        "path": []
+      },
+      "operator": {
+        "type": "equal"
+      },
+      "value": {
+        "type": "scalar",
+        "value": {
+          "title": "Jaime"
+        }
+      }
+    }
+  },
+  "arguments": {},
+  "collection_relationships": {}
+}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 409
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"nickname","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":"Dave"}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 400
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"age","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":52}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 400
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"age","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":45}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 400
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"age","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":52}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 406
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"name","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":"David"}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 406
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"name","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":"David"}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 400
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"age","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":52}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 409
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"nickname","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":"Dave"}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 406
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"where":{"type":"binary_comparison_operator","column":{"type":"column","name":"name","path":[]},"operator":{"type":"equal"},"value":{"type":"scalar","value":{"title":"David"}}}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 332
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[{"order_direction":"asc","target":{"type":"column","name":"name","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 256
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 256
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 331
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[{"order_direction":"asc","target":{"type":"column","name":"age","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 256
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 256
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 408
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[{"order_direction":"asc","target":{"type":"column","name":"name","path":[]}},{"order_direction":"asc","target":{"type":"column","name":"age","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 256
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 337
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[{"order_direction":"desc","target":{"type":"column","name":"nickname","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 256
+
+{"collection":"person","query":{"fields":{"age":{"type":"column","column":"age"},"name":{"type":"column","column":"name"},"nickname":{"type":"column","column":"nickname"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 134
+
+{"collection":"person","query":{"aggregates":{"count":{"type":"star_count"}},"limit":10},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 164
+
+{"collection":"searchQuery","query":{"fields":{"search_result":{"type":"column","column":"search_result"}},"limit":10},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 139
+
+{"collection":"searchQuery","query":{"aggregates":{"count":{"type":"star_count"}},"limit":10},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 187
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 372
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[{"order_direction":"desc","target":{"type":"column","name":"height","path":[]}},{"order_direction":"desc","target":{"type":"column","name":"width","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 292
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[{"order_direction":"desc","target":{"type":"column","name":"width","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 214
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 293
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[{"order_direction":"desc","target":{"type":"column","name":"height","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 214
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 370
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[{"order_direction":"asc","target":{"type":"column","name":"width","path":[]}},{"order_direction":"asc","target":{"type":"column","name":"height","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 214
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 214
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 372
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[{"order_direction":"desc","target":{"type":"column","name":"height","path":[]}},{"order_direction":"desc","target":{"type":"column","name":"width","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 293
+
+{"collection":"photo","query":{"fields":{"height":{"type":"column","column":"height"},"width":{"type":"column","column":"width"}},"limit":10,"order_by":{"elements":[{"order_direction":"desc","target":{"type":"column","name":"height","path":[]}}]}},"arguments":{},"collection_relationships":{}}
+
+# Expect: 200 OK
+# Response: HTTP/1.1 200 OK
+# Result: Passed
+POST http://:HOST::PORT/query
+content-type: application/json
+accept: */*
+host: localhost:5000
+content-length: 133
+
+{"collection":"photo","query":{"aggregates":{"count":{"type":"star_count"}},"limit":10},"arguments":{},"collection_relationships":{}}
