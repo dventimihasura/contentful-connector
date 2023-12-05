@@ -1,9 +1,11 @@
 from flask import Flask, request
 import contentful_management
 import os
-import requests
 
 app = Flask(__name__)
+client = contentful_management.Client(os.getenv("API_KEY"))
+space = client.spaces().find(os.getenv("SPACE"))
+environment = space.environments().find(os.getenv("ENVIRONMENT"))
 
 
 @app.get("/healthz")
@@ -125,27 +127,33 @@ def schema():
 
 @app.post("/query")
 def query():
-    client = contentful_management.Client(os.getenv("API_KEY"))
-    space = client.spaces().find(os.getenv("SPACE"))
-    environment = space.environments().find(os.getenv("ENVIRONMENT"))
     queryRequest = request.get_json()
     content_type = environment.content_types().find(queryRequest["collection"])
     fields = []
+    limit = None
+    where = None
     if "query" in queryRequest:
         if "fields" in queryRequest["query"]:
-            fields = queryRequest["query"]["fields"] 
-    limit = queryRequest["query"]["limit"]
+            fields = queryRequest["query"]["fields"]
+        if "limit" in queryRequest["query"]:
+            limit = queryRequest["query"]["limit"]
+        if "where" in queryRequest["query"]:
+            where = queryRequest["query"]["where"]
     response = content_type.entries().all()
+    rows = [
+        {
+            k: {"title": v["en-US"]} for k, v in row.to_json()["fields"].items() if k in fields
+        } if fields else
+        {
+            k: {"title": v["en-US"]} for k, v in row.to_json()["fields"].items()
+        } for row in response
+    ]
+    if where:
+        rows = rows
+    rows = rows[:limit]
     queryResponse = [
         {
-            "rows": [
-                {
-                    k: {"title": v["en-US"]} for k, v in row.to_json()["fields"].items() if k in fields
-                } if fields else
-                {
-                    k: {"title": v["en-US"]} for k, v in row.to_json()["fields"].items()
-                } for row in response 
-            ][:limit]
+            "rows": rows
         }
     ]
     if "query" in queryRequest:
