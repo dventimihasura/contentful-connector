@@ -142,10 +142,10 @@ def query():
     response = content_type.entries().all()
     rows = [
         {
-            k: {"title": v["en-US"]} for k, v in row.to_json()["fields"].items() if k in fields
+            k: {"title": v["en-US"] if "en-US" in v else None} for k, v in row.to_json()["fields"].items() if k in fields
         } if fields else
         {
-            k: {"title": v["en-US"]} for k, v in row.to_json()["fields"].items()
+            k: {"title": v["en-US"] if "en-US" in v else None} for k, v in row.to_json()["fields"].items()
         } for row in response
     ]
     if where:
