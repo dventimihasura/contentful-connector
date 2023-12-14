@@ -124,33 +124,19 @@ def schema():
 @app.post("/query")
 def query():
     queryRequest = request.get_json()
-    collection = queryRequest.get("collection")
-    if "query" in queryRequest:
-        if "aggregates" in queryRequest["query"]:
-            if "count" in queryRequest["query"]["aggregates"]:
-                if "type" in queryRequest["query"]["aggregates"]["count"]:
-                    if "star_count"==queryRequest["query"]["aggregates"]["count"]["type"]:
-                        return [
-                            {
-                                "aggregates": {
-                                    "name": "star_count",
-                                    "count": 0
-                                }
-                            }
-                        ], 200
-                    if "column_count"==queryRequest["query"]["aggregates"]["count"]["type"]:
-                        return [
-                            {
-                                "aggregates": {
-                                    "name": "column_count",
-                                    "count": 0
-                                }
-                            }
-                        ], 200
+    if queryRequest.get("query").get("aggregates"):
+        return [
+            {
+                "aggregates": {
+                    "name": "star_count",
+                    "count": 0
+                }
+            }
+        ], 200
     limit = queryRequest.get("query").get("limit")
     fields = queryRequest.get("query").get("fields")
     response = requests.get(
-        f"{base_url()}/spaces/{space()}/environments/{environment()}/entries?content_type={collection}{'&limit=' + str(limit) if limit else ''}",
+        url(queryRequest),
         headers={
             "Authorization": f"Bearer {api_key()}"
         }).json()["items"]
@@ -165,3 +151,20 @@ def query():
             "rows": rows
         }
     ], 200
+
+
+def url(queryRequest):
+    return f"{path_part(queryRequest)}?{query_part(queryRequest)}"
+
+
+def path_part(queryRequest):
+    return f"{base_url()}/spaces/{space()}/environments/{environment()}/entries"
+
+
+def query_part(queryRequest):
+    collection = queryRequest.get("collection")
+    limit = queryRequest.get("query").get("limit")
+    params = []
+    params = params + [f"content_type={collection}"]
+    params = params + [f"limit={limit}"] if limit else []
+    return "&".join(params)
