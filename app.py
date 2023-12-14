@@ -1,11 +1,83 @@
 from flask import Flask, request
-import contentful_management
+import functools
 import os
+import requests
 
 app = Flask(__name__)
-client = contentful_management.Client(os.getenv("API_KEY"))
-space = client.spaces().find(os.getenv("SPACE"))
-environment = space.environments().find(os.getenv("ENVIRONMENT"))
+
+base_url = functools.cache(lambda: "https://api.contentful.com")
+api_key = functools.cache(lambda: os.getenv("API_KEY"))
+space = functools.cache(lambda: os.getenv("SPACE"))
+environment = functools.cache(lambda: os.getenv("ENVIRONMENT"))
+kapabilities = functools.cache(lambda: {
+    "versions": "^0.1.0",
+    "capabilities": {
+        "query": {
+            "relation_comparisons": {},
+            "order_by_aggregate": {},
+            "foreach": {}
+        },
+        "explain": {},
+        "mutations": {
+            "nested_inserts": {},
+            "returning": {}
+        },
+        "relationships": {}
+    }
+})
+content_types = functools.cache(lambda: requests.get(
+    f"{base_url()}/spaces/{space()}/environments/{environment()}/content_types",
+    headers={
+        "Authorization": f"Bearer {api_key()}"
+    }).json()["items"])
+scalar_types = functools.cache(lambda: {
+    "Array": {"aggregate_functions": {}, "comparison_operators": {}},
+    "Boolean": {"aggregate_functions": {}, "comparison_operators": {}},
+    "Number": {"aggregate_functions": {}, "comparison_operators": {}},
+    "Object": {"aggregate_functions": {}, "comparison_operators": {}},
+    "String": {"aggregate_functions": {}, "comparison_operators": {}}
+})
+type_map = functools.cache(lambda: {
+    "Symbol": "String",
+    "Text": "String",
+    "RichText": "String",
+    "Integer": "Number",
+    "Number": "Number",
+    "Date": "String",
+    "Location": "Object",
+    "Boolean": "Boolean",
+    "Link": "Object",
+    "Array": "Array",
+    "Object": "Object"
+})
+object_types = functools.cache(lambda: {
+    ct["sys"]["id"]: {
+        "description": ct["name"],
+        "fields": {
+            f["id"]: {
+                "description": f"{ct['displayField']}: {ct['name']} {ct['description']}",
+                "arguments": {},
+                "type": {
+                    "type": "named",
+                    "name": type_map()[f["type"]]
+                }
+            } for f in ct["fields"]
+        }
+    } for ct in content_types()
+})
+collections = functools.cache(lambda: [
+    {
+        "name": ct["sys"]["id"],
+        "description": f"{ct['displayField']}: {ct['name']} {ct['description']}",
+        "arguments": {},
+        "type": ct["sys"]["id"],
+        "deletable": False,
+        "uniqueness_constraints": {},
+        "foreign_keys": {}
+    } for ct in content_types()
+])
+functions = functools.cache(lambda: [])
+procedures = functools.cache(lambda: [])
 
 
 @app.get("/healthz")
@@ -27,22 +99,7 @@ total_requests 48
 
 @app.get("/capabilities")
 def capabilities():
-    return {
-        "versions": "^0.1.0",
-        "capabilities": {
-            "query": {
-                "relation_comparisons": {},
-                "order_by_aggregate": {},
-                "foreach": {}
-            },
-            "explain": {},
-            "mutations": {
-                "nested_inserts": {},
-                "returning": {}
-            },
-            "relationships": {}
-        }
-    }
+    return kapabilities()
 
 
 @app.post("/explain")
@@ -55,118 +112,56 @@ def explain():
 
 @app.get("/schema")
 def schema():
-    client = contentful_management.Client(os.getenv("API_KEY"))
-    space = client.spaces().find(os.getenv("SPACE"))
-    environment = space.environments().find(os.getenv("ENVIRONMENT"))
-    content_types = environment.content_types().all()
-    scalar_types = {
-        "Int": {
-            "aggregate_functions": {},
-            "comparison_operators": {}
-        },
-        "String": {
-            "aggregate_functions": {},
-            "comparison_operators": {}
-        },
-        "json": {
-            "aggregate_functions": {},
-            "comparison_operators": {}
-        },
-    }
-    object_types = {
-        ct.id: {
-            "description": ct.name,
-            "fields": {
-                f.id: {
-                    "description": f.name,
-                    "arguments": {},
-                    "type": {
-                        "type": "named",
-                        "name": "Int"
-                    } if f.type == "Integer"
-                    else {
-                        "type": "named",
-                        "name": "String"
-                    } if f.type == "Text"
-                    else {
-                        "type": "array",
-                        "element_type": {
-                            "type": "named",
-                            "name": "json"
-                        }
-                    } if f.type == "Array"
-                    else {
-                        "type": "named",
-                        "name": "String"
-                    }
-                } for f in ct.fields
-            }
-        } for ct in content_types
-    }
-    collections = [
-        {
-            "name": f"{ct.id}",
-            "description": ct.description,
-            "arguments": {},
-            "type": ct.id,
-            "deletable": False,
-            "uniqueness_constraints": {},
-            "foreign_keys": {}
-        } for ct in content_types
-    ]
-    functions = []
-    procedures = []
     return {
-        "scalar_types": scalar_types,
-        "object_types": object_types,
-        "collections": collections,
-        "functions": functions,
-        "procedures": procedures
+        "scalar_types": scalar_types(),
+        "object_types": object_types(),
+        "collections": collections(),
+        "functions": functions(),
+        "procedures": procedures()
     }
 
 
 @app.post("/query")
 def query():
     queryRequest = request.get_json()
-    content_type = environment.content_types().find(queryRequest["collection"])
-    fields = []
-    limit = None
-    where = None
-    if "query" in queryRequest:
-        if "fields" in queryRequest["query"]:
-            fields = queryRequest["query"]["fields"]
-        if "limit" in queryRequest["query"]:
-            limit = queryRequest["query"]["limit"]
-        if "where" in queryRequest["query"]:
-            where = queryRequest["query"]["where"]
-    response = content_type.entries().all()
-    rows = [
-        {
-            k: {"title": v["en-US"] if "en-US" in v else None} for k, v in row.to_json()["fields"].items() if k in fields
-        } if fields else
-        {
-            k: {"title": v["en-US"] if "en-US" in v else None} for k, v in row.to_json()["fields"].items()
-        } for row in response
-    ]
-    if where:
-        rows = rows
-    rows = rows[:limit]
-    queryResponse = [
-        {
-            "rows": rows
-        }
-    ]
+    collection = queryRequest.get("collection")
     if "query" in queryRequest:
         if "aggregates" in queryRequest["query"]:
             if "count" in queryRequest["query"]["aggregates"]:
                 if "type" in queryRequest["query"]["aggregates"]["count"]:
                     if "star_count"==queryRequest["query"]["aggregates"]["count"]["type"]:
-                        queryResponse = [
+                        return [
                             {
                                 "aggregates": {
                                     "name": "star_count",
                                     "count": 0
                                 }
                             }
-                        ]
-    return queryResponse, 200
+                        ], 200
+                    if "column_count"==queryRequest["query"]["aggregates"]["count"]["type"]:
+                        return [
+                            {
+                                "aggregates": {
+                                    "name": "column_count",
+                                    "count": 0
+                                }
+                            }
+                        ], 200
+    limit = queryRequest.get("query").get("limit")
+    fields = queryRequest.get("query").get("fields")
+    response = requests.get(
+        f"{base_url()}/spaces/{space()}/environments/{environment()}/entries?content_type={collection}{'&limit=' + str(limit) if limit else ''}",
+        headers={
+            "Authorization": f"Bearer {api_key()}"
+        }).json()["items"]
+    rows = [
+        {
+            k: {"title": row.get("fields").get(k)} for k, _ in fields.items()
+        } for row in response
+    ]
+    rows = rows[:limit]
+    return [
+        {
+            "rows": rows
+        }
+    ], 200
