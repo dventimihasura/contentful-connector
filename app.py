@@ -112,6 +112,9 @@ def explain():
 
 @app.get("/schema")
 def schema():
+    content_types.cache_clear()
+    object_types.cache_clear()
+    collections.cache_clear()
     return {
         "scalar_types": scalar_types(),
         "object_types": object_types(),
@@ -165,6 +168,7 @@ def query_part(queryRequest):
     collection = queryRequest.get("collection")
     limit = queryRequest.get("query").get("limit")
     params = []
+    params = params + [f"include={10}"]
     params = params + [f"content_type={collection}"]
     params = params + [f"limit={limit}"] if limit else []
     return "&".join(params)
